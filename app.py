@@ -1,35 +1,42 @@
-from flask import Flask, render_template, request,redirect,jsonify
-from flask import Flask, render_template, request,redirect,jsonify
-import pdb
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
 animes = [
-    {'id': 1,
-    'stats':{
-        'title':'titulo',
-        'poster':'poster_prueba',
-        'categoria':'cat',
-        'rating':1.00,
-        'descripcion':'desc',
-    }
+    {
+        'id': 1,
+        'title': 'titulo',
+        'poster': 'poster_prueba',
+        'categoria': 'cat',
+        'rating': 1.00,
+        'descripcion': 'desc',
     }
 ]
 
 class Anime:
-    def __init__(self, title, category, img):
+    def __init__(self, id, title, poster, categoria, rating, descripcion):
+        self.id = id
         self.title = title
-        self.category = category
-        self.img = img
+        self.poster = poster
+        self.categoria = categoria
+        self.rating = rating
+        self.descripcion = descripcion
 
 @app.route('/animes')
 def all_animes():
-    return jsonify(animes)
+
+    animes_classified = [Anime(**anime) for anime in animes]
+    # return jsonify(animes) -> para mostrarlo en postman
+    return render_template('animes.html', animes = animes_classified)
 
 @app.route("/animes/<int:id>")
 def mostrar_anime(id):
     p = animes[0]
     return jsonify(p)
+
+@app.route('/animes/create')
+def show_create():
+    return render_template('animes_create.html')
 
 @app.route('/animes', methods=['POST'])
 def create_anime():
