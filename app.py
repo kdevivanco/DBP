@@ -51,7 +51,6 @@ def show_create():
 @app.route("/animes", methods=['POST'])
 def create_anime():
     data = request.json
-    pdb.set_trace()
     anime_create_model = AnimeModel(**data)
     anime = Anime(**anime_create_model.dict())
     db.session.add(anime)
@@ -62,7 +61,6 @@ def create_anime():
 def update_anime(id):
     data = request.json
     anime = Anime.query.get(id)
-    pdb.set_trace()
     if anime:
         anime_update_model = AnimeModel(**data)
         for key, value in anime_update_model.dict().items():
@@ -84,48 +82,23 @@ def delete_anime(id):
     else:
         return jsonify({'error': 'Anime not found'}), 404
     
+@app.route("/animes/<int:id>", methods=['PATCH'])
+def partial_update_anime(id):
+    data = request.json
+    anime = Anime.query.get(id)
 
-
-# @app.route('/animes', methods=['POST'])
-# def create_anime():
-#     new_anime = {
-#         'id':len(animes) +1,
-#         'title':request.json['title'],
-#         'poster':request.json['poster'],
-#         'categoria':request.json['categoria'],
-#         'rating':request.json['rating'],
-#         'descripcion':request.json['descripcion'],
-#     }
-#     animes.append(new_anime)
-#     return jsonify(new_anime)
-
-
-# #PUT
-# @app.route('/animes/<int:id>', methods=['PUT'])
-# def edit_anime(id):
-#     for i , a in enumerate (animes): #usar un for no es optimo, si se usa bdd se llamaria un filter usando el id para obtener el objeto
-#         if a['id'] == id:
-#             animes[i] = {
-#                 'id':id,
-#                 'title':request.json['title'],
-#                 'poster':request.json['poster'],
-#                 'categoria':request.json['categoria'],
-#                 'rating':request.json['rating'],
-#                 'descripcion':request.json['descripcion'],
-#             }
-#             return jsonify(animes[i])  
-#         else: 
-#             return jsonify({'message':'error'})
-
-# #DELETE
-# @app.route('/animes/<int:id>', methods=['DELETE']) 
-# def delete_anime(id):
-#     animes.pop(id-1)
-#     if len(animes) == 0:  #Esto es un ejemplo reduccionista porque la lista solo tiene un elemento
-#         return jsonify({'message': 'El anime ha sido eliminado'})
-#     else:
-#         return jsonify({'message':'error'})
-
+    if anime:
+        anime_update_model = AnimeModel(**anime.__dict__)  # Initialize with existing data
+        for key, value in data.items():
+            if hasattr(anime_update_model, key):
+                setattr(anime_update_model, key, value)
+        for key, value in anime_update_model.dict().items():
+            setattr(anime, key, value)
+        db.session.commit()
+        return jsonify({'message': 'Anime updated successfully'}), 200
+    else:
+        return jsonify({'error': 'Anime not found'}), 404
+    
 
 #if name = main
 if __name__ == "__main__":
